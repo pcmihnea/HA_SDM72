@@ -1,0 +1,32 @@
+{
+	"MQTT":
+	{
+		"HOSTNAME": "192.168.0.x",
+		"USERNAME": "_username_",
+		"PASSWORD": "_password_"
+	},
+	"SDM72":
+	{
+		"SAMPLE_INTERVAL": 10,
+		"SERIAL_PORT": "/dev/ttySC0",
+		"SLAVE_ADDRESS": 1,
+		"SENSORS":
+		{
+			"VOLTAGE_LN": [0, 3],
+			"POWER_ACTIVE": [12, 3],
+			"POWER_APPARENT": [18, 3],
+			"POWER_REACTIVE": [24, 3],
+			"POWER_FACTOR": [30, 3],
+			"CURRENT_L123": [48, 1],
+			"POWER_ACTIVE_SYS": [52, 1],
+			"POWER_APPARENT_SYS": [56, 1],
+			"POWER_REACTIVE_SYS": [60, 1],
+			"POWER_FACTOR_SYS": [62, 1],
+			"FREQUENCY_SYS": [70, 1],
+			"VOLTAGE_LL": [200, 3],
+			"CURRENT_N": [224, 1],
+			"ENERGY_ACTIVE_SYS": [342, 1],
+			"ENERGY_REACTIVE_SYS": [344, 1]
+		}
+	}
+}
