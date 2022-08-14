@@ -66,9 +66,9 @@ def mqtt_discovery(sn):
             dev_cfg['unit_of_measurement'] = param_unit
         else:
             continue
-        phase_count = PRIVATE_CONFIG['SDM72']['SENSORS'][param][0]
+        phase_count = PRIVATE_CONFIG['SDM72']['SENSORS'][param][1]
         for count in range(phase_count):
-            reg_addr = PRIVATE_CONFIG['SDM72']['SENSORS'][param][1] + count * 2
+            reg_addr = PRIVATE_CONFIG['SDM72']['SENSORS'][param][0] + count * 2
             if 1 != phase_count:
                 param_name = param + '_L' + str(count + 1)
             else:
