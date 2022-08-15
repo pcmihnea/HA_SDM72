@@ -3,9 +3,8 @@ import logging
 import struct
 import time
 
-import minimalmodbus
 import paho.mqtt.publish as publish
-import serial
+from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 PRIVATE_CONFIG = {}
 
@@ -28,6 +27,7 @@ def mqtt_discovery(sn):
     for param in PRIVATE_CONFIG['SDM72']['SENSORS'].keys():
         dev_cfg['state_class'] = 'measurement'
         param_type = param.split('_')
+        value_template = ''
         if 'VOLTAGE' == param_type[0]:
             dev_cfg['device_class'] = 'voltage'
             dev_cfg['unit_of_measurement'] = 'V'
@@ -49,7 +49,8 @@ def mqtt_discovery(sn):
                 param_unit = 'VAr'
             elif 'FACTOR' == param_type[1]:
                 param_class = 'power_factor'
-                param_unit = ''
+                param_unit = '%'
+                value_template = ' | float * 100'
             else:
                 continue
             dev_cfg['device_class'] = param_class
@@ -74,7 +75,7 @@ def mqtt_discovery(sn):
             else:
                 param_name = param
             dev_cfg['name'] = 'SDM72_' + param_name
-            dev_cfg['value_template'] = '{{ value_json.' + param_name + ' }}'
+            dev_cfg['value_template'] = '{{ value_json.' + param_name + value_template + ' }}'
             dev_cfg['unique_id'] = sn + str(reg_addr)
             meter_param_addr[reg_addr] = param_name
             meter_params_value[param_name] = 0
@@ -82,6 +83,7 @@ def mqtt_discovery(sn):
 
 
 if __name__ == '__main__':
+    modbus = ModbusClient()
     try:
         logging.info('INIT')
         meter_param_addr = {}
@@ -93,10 +95,12 @@ if __name__ == '__main__':
         if bool(PRIVATE_CONFIG['MQTT']):
             pass
         sample_interval = PRIVATE_CONFIG['SDM72']['SAMPLE_INTERVAL']
-        modbus = minimalmodbus.Instrument(port=PRIVATE_CONFIG['SDM72']['SERIAL_PORT'],
-                                          slaveaddress=PRIVATE_CONFIG['SDM72']['SLAVE_ADDRESS'])
-        modbus.serial.parity = serial.PARITY_EVEN
-        serial_num = str(modbus.read_long(registeraddress=0xFC00, functioncode=0x03))
+        unit_addr = PRIVATE_CONFIG['SDM72']['SLAVE_ADDRESS']
+        modbus = ModbusClient(method='rtu', port=PRIVATE_CONFIG['SDM72']['SERIAL_PORT'], baudrate=19200, parity='E')
+        modbus.connect()
+        result = modbus.read_holding_registers(address=0xFC00, count=2, unit=unit_addr).registers
+        print(result)
+        serial_num = str((result[0] << 16) + result[1])
         mqtt_discovery(sn=serial_num)
 
         reg_list = list(meter_param_addr.keys())
@@ -108,9 +112,8 @@ if __name__ == '__main__':
             start_time = time.time()
             for reg_range in reg_ranges:
                 param_count = (reg_range[1] - reg_range[0]) // 2 + 1
-                param_values = modbus.read_registers(registeraddress=reg_range[0],
-                                                     number_of_registers=param_count * 2,
-                                                     functioncode=0x04)
+                param_values = modbus.read_input_registers(address=reg_range[0], count=param_count * 2,
+                                                           unit=unit_addr).registers
                 for i in range(0, param_count * 2, 2):
                     meter_params_value[meter_param_addr[reg_range[0] + i]] = round(
                         struct.unpack('>f',
@@ -124,3 +127,7 @@ if __name__ == '__main__':
             time.sleep(sample_interval - (time.time() - start_time))
     except Exception:
         logging.exception('MAIN')
+    try:
+        modbus.close()
+    except Exception:
+        pass
