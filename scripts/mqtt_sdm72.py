@@ -27,7 +27,7 @@ def mqtt_discovery(sn):
     for param in PRIVATE_CONFIG['SDM72']['SENSORS'].keys():
         dev_cfg['state_class'] = 'measurement'
         param_type = param.split('_')
-        value_template = ''
+        value_template = ' )'
         if 'VOLTAGE' == param_type[0]:
             dev_cfg['device_class'] = 'voltage'
             dev_cfg['unit_of_measurement'] = 'V'
@@ -50,7 +50,7 @@ def mqtt_discovery(sn):
             elif 'FACTOR' == param_type[1]:
                 param_class = 'power_factor'
                 param_unit = '%'
-                value_template = ' | float * 100'
+                value_template = ' | float * 100.0 ) | round(3)'
             else:
                 continue
             dev_cfg['device_class'] = param_class
@@ -75,7 +75,7 @@ def mqtt_discovery(sn):
             else:
                 param_name = param
             dev_cfg['name'] = 'SDM72_' + param_name
-            dev_cfg['value_template'] = '{{ value_json.' + param_name + value_template + ' }}'
+            dev_cfg['value_template'] = '{{ ( value_json.' + param_name + value_template + ' }}'
             dev_cfg['unique_id'] = sn + str(reg_addr)
             meter_param_addr[reg_addr] = param_name
             meter_params_value[param_name] = 0
