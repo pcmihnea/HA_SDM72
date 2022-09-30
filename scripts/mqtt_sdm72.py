@@ -99,7 +99,6 @@ if __name__ == '__main__':
         modbus = ModbusClient(method='rtu', port=PRIVATE_CONFIG['SDM72']['SERIAL_PORT'], baudrate=19200, parity='E')
         modbus.connect()
         result = modbus.read_holding_registers(address=0xFC00, count=2, unit=unit_addr).registers
-        print(result)
         serial_num = str((result[0] << 16) + result[1])
         mqtt_discovery(sn=serial_num)
 
