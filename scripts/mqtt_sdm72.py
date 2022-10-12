@@ -23,7 +23,7 @@ def mqtt_discovery(sn):
                "device_class": '',
                "state_class": '',
                "unit_of_measurement": '',
-               "expire_after": sample_interval * 2}
+               "expire_after": sample_interval * 4}
     for param in PRIVATE_CONFIG['SDM72']['SENSORS'].keys():
         dev_cfg['state_class'] = 'measurement'
         param_type = param.split('_')
