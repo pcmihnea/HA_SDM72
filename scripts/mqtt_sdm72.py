@@ -4,7 +4,7 @@ import struct
 import time
 
 import paho.mqtt.publish as publish
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+from pymodbus.client import ModbusSerialClient
 
 PRIVATE_CONFIG = {}
 
@@ -83,7 +83,6 @@ def mqtt_discovery(sn):
 
 
 if __name__ == '__main__':
-    modbus = ModbusClient()
     try:
         logging.info('INIT')
         meter_param_addr = {}
@@ -96,9 +95,9 @@ if __name__ == '__main__':
             pass
         sample_interval = PRIVATE_CONFIG['SDM72']['SAMPLE_INTERVAL']
         unit_addr = PRIVATE_CONFIG['SDM72']['SLAVE_ADDRESS']
-        modbus = ModbusClient(method='rtu', port=PRIVATE_CONFIG['SDM72']['SERIAL_PORT'], baudrate=19200, parity='E')
+        modbus = ModbusSerialClient(method='rtu', port=PRIVATE_CONFIG['SDM72']['SERIAL_PORT'], baudrate=19200, parity='E')
         modbus.connect()
-        result = modbus.read_holding_registers(address=0xFC00, count=2, unit=unit_addr).registers
+        result = modbus.read_holding_registers(address=0xFC00, count=2, slave=unit_addr).registers
         serial_num = str((result[0] << 16) + result[1])
         mqtt_discovery(sn=serial_num)
 
@@ -112,7 +111,7 @@ if __name__ == '__main__':
             for reg_range in reg_ranges:
                 param_count = (reg_range[1] - reg_range[0]) // 2 + 1
                 param_values = modbus.read_input_registers(address=reg_range[0], count=param_count * 2,
-                                                           unit=unit_addr).registers
+                                                           slave=unit_addr).registers
                 for i in range(0, param_count * 2, 2):
                     meter_params_value[meter_param_addr[reg_range[0] + i]] = round(
                         struct.unpack('>f',
