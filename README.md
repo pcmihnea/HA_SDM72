@@ -21,4 +21,4 @@ Edit the [`private_config.json`](scripts/private_config.json) file by configurin
 		- If only a single value is reported (for eg. `Sum of line currents`) set to `1`.  
 
 # Who/where/when?
-All the reverse-engineering, development, integration, and documentation efforts are based on the latest software and hardware versions available at the time of writing (September 2022), and licensed under the GNU General Public License v3.0.
+All the reverse-engineering, development, integration, and documentation efforts are based on the latest software and hardware versions available at the time of writing (October 2022), and licensed under the GNU General Public License v3.0.
