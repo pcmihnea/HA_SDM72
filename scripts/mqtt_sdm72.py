@@ -62,7 +62,7 @@ def mqtt_discovery(sn):
                 param_unit = 'kVArh'
             else:
                 continue
-            dev_cfg['state_class'] = 'total_increasing'
+            dev_cfg['state_class'] = 'total'
             dev_cfg['device_class'] = 'energy'
             dev_cfg['unit_of_measurement'] = param_unit
         else:
